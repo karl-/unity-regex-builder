@@ -7,7 +7,7 @@ namespace Parabox.RegexConstructor
 {
 	public class RegexBuilder : EditorWindow
 	{
-		[MenuItem("Window/Regex Construction Window")]
+		[MenuItem("Window/Regex Builder Window")]
 		static void Init()
 		{
 			EditorWindow.GetWindow<RegexBuilder>().Show();
