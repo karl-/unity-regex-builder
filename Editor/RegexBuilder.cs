@@ -52,7 +52,6 @@ namespace Parabox.RegexConstructor
 
 			Color color = GUI.color;
 			string error = string.Empty;
-			bool valid = true;
 
 			GUILayout.Label("Matches", EditorStyles.boldLabel);
 			
@@ -76,13 +75,10 @@ namespace Parabox.RegexConstructor
 			}
 			catch(System.Exception e)
 			{
-				valid = false;
 				error = e.Message;
-			}
-
-
-			if(!valid)
 				EditorGUILayout.HelpBox(error, MessageType.Error);
+				GUILayout.Label(sample, matches_style);
+			}
 
 			GUILayout.EndScrollView();
 
