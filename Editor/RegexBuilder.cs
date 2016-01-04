@@ -27,6 +27,8 @@ namespace Parabox.RegexConstructor
 
 			matches_style.font = font;
 			matches_style.richText = true;
+			matches_style.margin = new RectOffset(4,4,4,4);
+			matches_style.padding = new RectOffset(2,2,2,2);
 			matches_style.normal.textColor = new Color(1f, 1f, 1f, .7f);
 		}
 
@@ -41,7 +43,7 @@ namespace Parabox.RegexConstructor
 				GUILayout.FlexibleSpace();
 				if(GUILayout.Button("cheatsheet"))	
 					Application.OpenURL("https://msdn.microsoft.com/en-us/library/az24scfc(v=vs.110).aspx");
-				if(GUILayout.Button("Copy Escaped Pattern"))
+				if(GUILayout.Button("copy escaped pattern"))
 					GUIUtility.systemCopyBuffer = escaped_pattern.Replace("\\", "\\\\").Replace("\"", "\\\"");
 			GUILayout.EndHorizontal();
 
