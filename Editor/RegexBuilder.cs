@@ -12,11 +12,13 @@ namespace Parabox.RegexConstructor
 		{
 			public string text;
 			public string error;
+			public int matchCount;
 
-			public ProcessedText(string text, string error)
+			public ProcessedText(string text, string error, int matchCount)
 			{
 				this.text = text;
 				this.error = error;
+				this.matchCount = matchCount;
 			}
 		}
 
@@ -84,7 +86,7 @@ namespace Parabox.RegexConstructor
 
 			Color color = GUI.color;
 
-			GUILayout.Label("Matches", EditorStyles.boldLabel);
+			GUILayout.Label("Matches (" + processed.matchCount + ")", EditorStyles.boldLabel);
 
 			if( !string.IsNullOrEmpty(processed.error) )
 				EditorGUILayout.HelpBox(processed.error, MessageType.Error);
@@ -124,7 +126,7 @@ namespace Parabox.RegexConstructor
 
 		static ProcessedText DoRegex(string source, string pattern)
 		{
-			ProcessedText processed = new ProcessedText(source, null);
+			ProcessedText processed = new ProcessedText(source, null, 0);
 
 			try
 			{
@@ -134,6 +136,7 @@ namespace Parabox.RegexConstructor
 				bool open = false;
 
 				MatchCollection matches = Regex.Matches(source, pattern);
+				processed.matchCount = matches.Count;
 
 				for(int i = 0; i < matches.Count; i++)
 				{
