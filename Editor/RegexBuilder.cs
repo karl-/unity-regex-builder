@@ -35,6 +35,7 @@ namespace Parabox.RegexConstructor
 		[SerializeField] string m_SampleText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec pulvinar, diam ut mattis dictum, risus elit accumsan velit, a efficitur velit mauris id massa. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque lobortis odio quis turpis bibendum malesuada. Suspendisse tincidunt molestie tortor non bibendum. Donec in lorem quis nunc pellentesque elementum sed ut arcu. Quisque ac tortor dolor. Nunc sed aliquet massa. Etiam sed orci et orci imperdiet scelerisque non ut neque. Quisque congue risus diam, quis tempor ligula pulvinar nec. Quisque blandit, tellus ut volutpat malesuada, purus dui porttitor nisi, sed egestas libero ipsum eget risus.";
 		GUIStyle m_PatternSearchBox;
 		GUIStyle m_VerticalWrapperStyle;
+		static string s_MatchColor;
 
 #if CUSTOM_FONT
 		Font font;
@@ -60,6 +61,7 @@ namespace Parabox.RegexConstructor
 		{
 			m_IsGuiInitialized = false;
 			m_ProcessedText = DoRegex(m_SampleText, m_RegexPattern, m_RegexOptions);
+			s_MatchColor = EditorGUIUtility.isProSkin ? "<color=#00FF00FF>" : "<color=#00DD00FF>";
 
 			Type splitterStateType = Type.GetType("UnityEditor.SplitterState, UnityEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
 
@@ -110,7 +112,7 @@ namespace Parabox.RegexConstructor
 				m_MatchesStyle.richText = true;
 				m_MatchesStyle.margin = new RectOffset(4,4,4,4);
 				m_MatchesStyle.padding = new RectOffset(2,2,2,2);
-				m_MatchesStyle.normal.textColor = new Color(1f, 1f, 1f, .7f);
+				m_MatchesStyle.normal.textColor = EditorGUIUtility.isProSkin ? new Color(1f, 1f, 1f, .7f) : new Color(.1f, .1f, .1f, 1f);
 				m_MatchesStyle.wordWrap = true;
 
 				m_PatternStyle = new GUIStyle(EditorStyles.textArea);
@@ -239,7 +241,7 @@ namespace Parabox.RegexConstructor
 
 					if(!open)
 					{
-						sb.Insert(inc + match.Index, "<color=#00FF00FF>");
+						sb.Insert(inc + match.Index, s_MatchColor);
 						inc += 17;
 					}
 
