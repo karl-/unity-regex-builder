@@ -1,4 +1,4 @@
-﻿// #define CUSTOM_FONT
+// #define CUSTOM_FONT
 
 using System;
 using System.Globalization;
@@ -7,10 +7,14 @@ using UnityEditor;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Reflection;
-using UnityEngine.UI;
 
 namespace Parabox.RegexConstructor
 {
+	class RegexInputString : ScriptableObject
+	{
+		public string Value;
+	}
+
 	public class RegexBuilder : EditorWindow
 	{
 		struct ProcessedText
@@ -31,7 +35,7 @@ namespace Parabox.RegexConstructor
 		MethodInfo m_BeginVerticalSplit;
 		MethodInfo m_EndVerticalSplit;
 		[SerializeField] object m_SplitterState;
-		[SerializeField] string m_RegexPattern = "(?i)lorem";
+		[SerializeField] RegexInputString m_RegexPattern;
 		[SerializeField] string m_SampleText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec pulvinar, diam ut mattis dictum, risus elit accumsan velit, a efficitur velit mauris id massa. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque lobortis odio quis turpis bibendum malesuada. Suspendisse tincidunt molestie tortor non bibendum. Donec in lorem quis nunc pellentesque elementum sed ut arcu. Quisque ac tortor dolor. Nunc sed aliquet massa. Etiam sed orci et orci imperdiet scelerisque non ut neque. Quisque congue risus diam, quis tempor ligula pulvinar nec. Quisque blandit, tellus ut volutpat malesuada, purus dui porttitor nisi, sed egestas libero ipsum eget risus.";
 		GUIStyle m_PatternSearchBox;
 		GUIStyle m_VerticalWrapperStyle;
@@ -60,7 +64,10 @@ namespace Parabox.RegexConstructor
 		void OnEnable()
 		{
 			m_IsGuiInitialized = false;
-			m_ProcessedText = DoRegex(m_SampleText, m_RegexPattern, m_RegexOptions);
+			m_RegexPattern = CreateInstance<RegexInputString>();
+			m_RegexPattern.hideFlags = HideFlags.HideAndDontSave;
+			m_RegexPattern.Value = "(?i)lorem";
+			m_ProcessedText = DoRegex(m_SampleText, m_RegexPattern.Value, m_RegexOptions);
 			s_MatchColor = EditorGUIUtility.isProSkin ? "<color=#00FF00FF>" : "<color=#00DD00FF>";
 
 			Type splitterStateType = Type.GetType("UnityEditor.SplitterState, UnityEditor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
@@ -96,6 +103,15 @@ namespace Parabox.RegexConstructor
 					GUILayout.ExpandHeight(true)
 				}
 			};
+
+			Undo.undoRedoPerformed += Repaint;
+		}
+
+		void OnDisable()
+		{
+			if (m_RegexPattern != null)
+				DestroyImmediate(m_RegexPattern);
+			Undo.undoRedoPerformed -= Repaint;
 		}
 
 		void OnGUI()
@@ -161,13 +177,22 @@ namespace Parabox.RegexConstructor
 			if(GUILayout.Button("cheatsheet"))
 				Application.OpenURL("https://msdn.microsoft.com/en-us/library/az24scfc(v=vs.110).aspx");
 			if(GUILayout.Button("copy escaped pattern"))
-				GUIUtility.systemCopyBuffer = m_RegexPattern.Replace("\\", "\\\\").Replace("\"", "\\\"");
+				GUIUtility.systemCopyBuffer = m_RegexPattern.Value.Replace("\\", "\\\\").Replace("\"", "\\\"");
 			GUILayout.EndHorizontal();
 
 			EditorGUI.BeginChangeCheck();
-			m_RegexPattern = EditorGUILayout.TextArea(m_RegexPattern, m_PatternSearchBox);
+			var pattern = m_RegexPattern.Value;
+//			m_RegexPattern = EditorGUILayout.TextArea(m_RegexPattern, m_PatternSearchBox);
+			EditorGUI.BeginChangeCheck();
+			pattern = EditorGUILayout.TextArea(pattern, m_PatternSearchBox);
+			if (EditorGUI.EndChangeCheck())
+			{
+				Undo.RecordObject(m_RegexPattern, "Regex Pattern Edit");
+				m_RegexPattern.Value = pattern;
+			}
+
 			if(EditorGUI.EndChangeCheck())
-				m_ProcessedText = DoRegex(m_SampleText, m_RegexPattern, m_RegexOptions);
+				m_ProcessedText = DoRegex(m_SampleText, m_RegexPattern.Value, m_RegexOptions);
 
 			GUILayout.Label("Matches (" + m_ProcessedText.matchCount + ")", EditorStyles.boldLabel);
 
@@ -192,7 +217,7 @@ namespace Parabox.RegexConstructor
 			if (EditorGUI.EndChangeCheck())
 			{
 				m_RegexOptions = m_RegexOptions ^ RegexOptions.Multiline;
-				m_ProcessedText = DoRegex(m_SampleText, m_RegexPattern, m_RegexOptions);
+				m_ProcessedText = DoRegex(m_SampleText, m_RegexPattern.Value, m_RegexOptions);
 			}
 			GUILayout.EndHorizontal();
 
@@ -200,7 +225,7 @@ namespace Parabox.RegexConstructor
 			m_ContentsScroll = GUILayout.BeginScrollView(m_ContentsScroll);
 			m_SampleText = EditorGUILayout.TextArea(m_SampleText, m_SampleTextStyle, GUILayout.ExpandHeight(true));
 			if (EditorGUI.EndChangeCheck())
-				m_ProcessedText = DoRegex(m_SampleText, m_RegexPattern, m_RegexOptions);
+				m_ProcessedText = DoRegex(m_SampleText, m_RegexPattern.Value, m_RegexOptions);
 			GUILayout.EndScrollView();
 
 		}
